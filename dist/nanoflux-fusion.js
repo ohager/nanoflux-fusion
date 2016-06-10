@@ -260,7 +260,9 @@ module.exports = {
 },{}],2:[function(_dereq_,module,exports){
 var nanoflux = _dereq_('nanoflux/dist/nanoflux');
 
-function createStore(){
+var FUSION_STORE_NAME = "__fusionStore__";
+
+function getFusionStoreDefinition(){
 
 	function deepFreeze(obj) {
 		var propNames = Object.getOwnPropertyNames(obj);
@@ -297,10 +299,12 @@ function createStore(){
 	}
 }
 
-var FUSION_STORE_NAME = "__fusionStore__";
 
-var store = nanoflux.createStore(FUSION_STORE_NAME, createStore());
-nanoflux.createDispatcher(null, ['__fuse']).connectTo(store);
+
+function createFusionStore(){
+	var store = nanoflux.createStore(FUSION_STORE_NAME, getFusionStoreDefinition());
+	nanoflux.createDispatcher(null, ['__fuse']).connectTo(store);
+}
 
 // extend nanoflux interface
 nanoflux.getFusionStore = function(){ return nanoflux.getStore(FUSION_STORE_NAME) };
@@ -315,6 +319,15 @@ nanoflux.createFusionActor = function(fuseFunc, actorId){
 		})
 	}
 };
+
+// override for tests
+var baseReset = nanoflux.reset;
+nanoflux.reset = function(){
+	baseReset();
+	createFusionStore();
+};
+
+createFusionStore();
 
 module.exports = nanoflux;
 

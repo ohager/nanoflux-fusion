@@ -11,7 +11,16 @@ nanofluxDir = "../src/nanoflux-fusion";
 var NanoFlux = require(nanofluxDir);
 
 describe("NanoFlux Fusion", function () {
-	
+
+	beforeEach(function(){
+		NanoFlux.reset();
+	});
+
+	it("verify Fusion API existence after reset", function () {
+		expect(NanoFlux.getFusionStore).toBeDefined();
+		expect(NanoFlux.createFusionActor).toBeDefined();
+	});
+
 	it("should use FusionActor 'test', fuse state and notify subscriber", function () {
 		
 		var fusionStore = NanoFlux.getFusionStore();
@@ -29,12 +38,12 @@ describe("NanoFlux Fusion", function () {
 		}
 
 		var testActor = NanoFlux.createFusionActor(myFusion, "test");
-
 		testActor("someValue",{ foo: "foo", bar: 123} );
 
 		subscription.unsubscribe();
 
 	});
 
+	// MORE TESTS
 
 });
