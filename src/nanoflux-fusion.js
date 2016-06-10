@@ -28,10 +28,10 @@ function getFusionStoreDefinition(){
 		on__fuse : function(args){
 			var state = {};
 
-			Object.assign(state, args.fuse.call(null, stateHolder.immutableState, args.action));
+			Object.assign(state, stateHolder.immutableState, args.fuse.call(null, stateHolder.immutableState, args.action));
 			stateHolder.setState(state);
 
-			this.notify(state);
+			this.notify(stateHolder.immutableState);
 		},
 		getState : function(){
 			return stateHolder.immutableState;
