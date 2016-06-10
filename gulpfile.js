@@ -4,7 +4,7 @@ var browserify = require('gulp-browserify');
 var uglify = require('gulp-uglify');
 var preprocess = require('gulp-preprocess');
 var jasmine = require('gulp-jasmine');
-var sequence = require('gulp-run-sequence');
+var sequence = require('run-sequence');
 
 
 gulp.task('build', function() {
