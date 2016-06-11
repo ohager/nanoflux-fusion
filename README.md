@@ -1,21 +1,31 @@
 [![Build Status](https://travis-ci.org/ohager/nanoflux-fusion.svg?branch=master)](https://travis-ci.org/ohager/nanoflux-fusion)
 
+
+
 # nanoflux-fusion
 
 [__PROJECT SITE__](http://ohager.github.io/nanoflux/)
 
+> Note: This is still a very early version and considered as a developer preview
+
 A Redux-like extension for Nanoflux.
 
-This extension uses the concept of reducer functions for application state management.
+*nanoflux-fusion* is built on top of [nanoflux](https://github.com/ohager/nanoflux), a quite efficient Flux implementation,  
+and adopts the concept of reducer functions for application state management, making Flux even more comfortable.
 
 ## Concept
 
+[Dan Abramov](https://github.com/gaearon) pushed the Flux evolution with [Redux](http://redux.js.org/) and proved that application 
+state management is possible with a very minimalistic approach. The idea of using reducer functions to alter the state
+is very elegant. *nanoflux-fusion* adopts the idea of reducer functions (called *Fusionators*, because naming is fun) to make Flux even more comfortable.
+That way, it's not necessary to define any Store. The user just focus on *how* he wants to alter the state using
+functions the simply return the new state.
 
-# Example
+### Example
 
 ```javascript
 
-	var NanoFlux = require('nanoflux-fusion/dist/nanoflux-fusion.min');
+	var NanoFlux = require('nanoflux-fusion');
 	
 	// NanoFlux provides a dedicated store
 	var fusionStore = NanoFlux.getFusionStore();
