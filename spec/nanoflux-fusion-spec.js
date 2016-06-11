@@ -75,6 +75,42 @@ describe("NanoFlux Fusion", function () {
 
 	});
 
+	it("should work with multiple fusionators", function () {
+
+		var fusionStore = NanoFlux.getFusionStore();
+
+		function fusionatorA(state, action){
+			if(action.id === "actionA"){
+				return { a: action.args[0] }
+			}
+		}
+
+		function fusionatorB(state, action){
+			if(action.id === "actionB"){
+				return { b: action.args[0] }
+			}
+		}
+
+		var subscription = fusionStore.subscribe(this, function(state){
+			if(state.a){
+				expect(state.a).toBe("fromFusionatorA");
+			}
+			if(state.b){
+				expect(state.b).toBe("fromFusionatorB");
+			}
+		});
+
+		// first fusionator
+		var fusionatorAActor = NanoFlux.createFusionActor(fusionatorA, "actionA");
+		var fusionatorBActor = NanoFlux.createFusionActor(fusionatorB, "actionB");
+
+		fusionatorAActor("fromFusionatorA");
+		fusionatorBActor("fromFusionatorB");
+
+		subscription.unsubscribe();
+
+	});
+
 
 	// MORE TESTS
 
