@@ -44,6 +44,38 @@ describe("NanoFlux Fusion", function () {
 
 	});
 
+	it("should merge state without overwriting", function () {
+
+		var fusionStore = NanoFlux.getFusionStore();
+
+		function myFusion(state, action){
+			if(action.id === "init"){
+				return { initial: action.args[0] }
+			}
+			if(action.id === "test"){
+				return { a: action.args[0], b: action.args[1] }
+			}
+		}
+
+		var initialStateActor = NanoFlux.createFusionActor(myFusion, "init");
+		var test2Actor = NanoFlux.createFusionActor(myFusion, "test");
+
+		// no callback yet
+		initialStateActor("initialState");
+
+		var subscription = fusionStore.subscribe(this, function(state){
+			expect(state.initial).toBe("initialState");
+			expect(state.a).toBe("test");
+			expect(state.b.other).toBe("other");
+		});
+
+		test2Actor("test",{ other: "other"} );
+
+		subscription.unsubscribe();
+
+	});
+
+
 	// MORE TESTS
 
 });
