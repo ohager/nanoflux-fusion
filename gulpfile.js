@@ -9,17 +9,13 @@ var sequence = require('run-sequence');
 
 gulp.task('build', function() {
 	gulp.src('src/nanoflux-fusion.js')
-		.pipe(browserify({
-			standalone : 'NanoFlux'
-		}))
+		.pipe(browserify())
 		.pipe(gulp.dest('./dist'))
 });
 
 gulp.task('build:uglify', function() {
 	gulp.src('src/nanoflux-fusion.js')
-		.pipe(browserify({
-			standalone : 'NanoFlux'
-		}))
+		.pipe(browserify())
 		.pipe(uglify({
 			output : {
 				ascii_only : true

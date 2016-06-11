@@ -1,4 +1,4 @@
-var nanoflux = require('nanoflux/dist/nanoflux');
+var nanoflux = require('nanoflux');
 
 var FUSION_STORE_NAME = "__fusionStore__";
 
