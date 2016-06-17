@@ -10,24 +10,26 @@
     "url": "https://github.com/ohager/nanoflux-fusion"
   },
   "keywords": [
-    "flux", "redux"
+    "flux",
+    "redux"
   ],
   "dependencies": {
     "nanoflux": "latest"
   },
   "license": "MIT",
   "devDependencies": {
+    "async": "^2.0.0-rc.6",
     "browserify": "^11.0.1",
     "gulp": "^3.9.0",
     "gulp-browserify": "^0.5.1",
     "gulp-jasmine": "^2.0.1",
     "gulp-preprocess": "^1.2.0",
     "gulp-rename": "^1.2.2",
-    "run-sequence": "^0.3.2",
     "gulp-uglify": "^1.4.1",
     "jasmine-core": "^2.3.4",
     "jasmine-node": "^1.14.5",
-    "object-assign": "^4.0.1"
+    "object-assign": "^4.0.1",
+    "run-sequence": "^0.3.2"
   },
   "scripts": {
     "test": "node ./node_modules/jasmine-node/lib/jasmine-node/cli.js ./spec --verbose"
