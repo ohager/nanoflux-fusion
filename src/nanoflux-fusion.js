@@ -16,6 +16,7 @@ function getFusionStoreDefinition(){
 		return Object.freeze(obj);
 	}
 
+
 	var stateHolder = {
 		immutableState : {},
 		setState : function(newState){
@@ -24,14 +25,23 @@ function getFusionStoreDefinition(){
 		}
 	};
 
+	function fuseState(newState){
+		var state = {};
+		Object.assign(state, stateHolder.immutableState, newState);
+		stateHolder.setState(state);
+		this.notify(stateHolder.immutableState);
+	}
+
 	return {
 		on__fuse : function(args){
-			var state = {};
 
-			Object.assign(state, stateHolder.immutableState, args.fuse.call(null, stateHolder.immutableState, args.action));
-			stateHolder.setState(state);
+			var fusionator = args.fuse.call(null, stateHolder.immutableState, args.action);
+			if(fusionator.then){ // is promise
+				fusionator.then(fuseState.bind(this));
+			}else{
+				fuseState.call(this, fusionator);
+			}
 
-			this.notify(stateHolder.immutableState);
 		},
 		getState : function(){
 			return stateHolder.immutableState;

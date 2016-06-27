@@ -110,32 +110,5 @@ describe("NanoFlux Fusion", function () {
 		subscription.unsubscribe();
 
 	});
-
-
-	it("actors should be usable within actions (making async call)", function (done) {
-
-		var fusionStore = NanoFlux.getFusionStore();
-
-		function fusionatorA(state, action) {
-			if (action.id === "actionA") {
-				return {a: action.args[0]}
-			}
-		}
-
-		var subscription = fusionStore.subscribe(this, function (state) {
-			expect(state.a).toBe("fromActionA");
-			done();
-		});
-
-		var actorA = NanoFlux.createFusionActor(fusionatorA, "actionA");
-		var actions = NanoFlux.createActions('action', null, {
-				test: function (a) {
-					setTimeout(actorA.bind(null, a), 500)
-				}
-			}
-		);
-
-		actions.test("fromActionA");
-	})
-
+	
 });
