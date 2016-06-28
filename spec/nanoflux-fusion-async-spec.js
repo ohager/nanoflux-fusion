@@ -9,8 +9,26 @@ nanofluxDir = "../src/nanoflux-fusion";
 // @endif
 
 var NanoFlux = require(nanofluxDir);
-
+var q = require('../node_modules/q/q');
 var subscription;
+
+
+function asyncA(){
+	return new Promise(function(resolve,reject){
+		setTimeout(function(){
+			resolve("fromAsyncA");
+		}, 500)
+	})
+}
+
+
+function asyncB(){
+	return new Promise(function(resolve,reject){
+		setTimeout(function(){
+			resolve({ a: "fromAsyncB" });
+		}, 500)
+	})
+}
 
 function asyncFusion(state, action) {
 	if (action.id === "test") {
@@ -20,6 +38,12 @@ function asyncFusion(state, action) {
 				// resolve to new state
 				resolve({a: action.args[0], b: action.args[1]});
 			}, 500);
+		});
+	}
+	else if(action.id === "chainTest"){
+		return asyncA().then(function(data){
+			console.log(data);
+			return asyncB();
 		});
 	}
 }
@@ -47,6 +71,20 @@ describe("NanoFlux Fusion Asynchronous", function () {
 		var testActor = NanoFlux.createFusionActor(asyncFusion, "test");
 
 		testActor("someValue", {foo: "foo", bar: 123});
+	});
+
+	it("should be able to deal with Promise Chains (async)", function (done) {
+
+		// when calling here, async should already be executed
+		var fusionStore = NanoFlux.getFusionStore();
+
+		subscription = fusionStore.subscribe(this, function(state){
+			expect(state.a).toBe("fromAsyncB");
+			subscription.unsubscribe();
+			done();
+		});
+
+		NanoFlux.createFusionActor(asyncFusion, "chainTest")();
 	});
 
 

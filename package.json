@@ -29,6 +29,7 @@
     "jasmine-core": "^2.3.4",
     "jasmine-node": "^1.14.5",
     "object-assign": "^4.0.1",
+    "q": "^1.4.1",
     "run-sequence": "^0.3.2"
   },
   "scripts": {
