@@ -96,8 +96,9 @@ function asyncA(arg1){
 function asyncB(arg1){
 	return new Promise(function(resolve,reject){
 		setTimeout(function(){
-			// returns state to be merged 
-			resolve({ b: 5 + arg1 });
+			var newState = arg1;
+			newState.b = 5 + arg1.a;
+			resolve(newState);
 		}, 500)
 	})
 }
@@ -109,7 +110,7 @@ function asyncFusionator(state, action) {
 	case "simplePromise":
 		return asyncA(action.args[0]); 
 		
-    case "chainedPromises":
+	case "chainedPromises":
 		return asyncA(action.args[0]).then(function(data){
 			console.log(data); // data = {a: 5} 
 			return asyncB(data);  
