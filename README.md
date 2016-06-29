@@ -77,8 +77,10 @@ the promise will be executed. The state shall be passed as argument of the resol
 *nanoflux-fusion* aims to support all [A+ compliant](https://promisesaplus.com/) implementations. 
 It is currently tested with the 
 
- - [native Promise-API](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)
- - [Q](https://github.com/kriskowal/q)
+ - [native Promise-API](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise/)
+ - [Q](https://github.com/kriskowal/q/)
+ - [RSVP](https://github.com/tildeio/rsvp.js/)
+ - [Bluebird](https://github.com/petkaantonov/bluebird/)
  
  ### Example
  
