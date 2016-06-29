@@ -100,7 +100,7 @@ describe("NanoFlux Fusion Asynchronous", function () {
 		NanoFlux.createFusionActor(asyncFusion, "chainTest")();
 	});
 
-	it("should be work with Q (A+ compliant promise lib)(async)", function (done) {
+	it("should work with Q (A+ compliant promise lib)(async)", function (done) {
 
 		// when calling here, async should already be executed
 		var fusionStore = NanoFlux.getFusionStore();
