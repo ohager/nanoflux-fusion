@@ -70,10 +70,65 @@ functions the simply return the new state.
 
 ```
 
+##Asynchronous Actions
 
-TODO
+*nanoflux-fusion* supports asynchronous actions out-of-the-box. If a Fusionator returns a promise instead of a state object,
+the promise will be executed. The state shall be passed as argument of the resolver. Chaining is also possible. 
+*nanoflux-fusion* aims to support all [A+ compliant](https://promisesaplus.com/) implementations. 
+It is currently tested with the 
 
-- More Test, especially test for eventual side-effects on nanoflux
+ - [native Promise-API](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+ - [Q](https://github.com/kriskowal/q)
+ 
+ ### Example
+ 
+```javascript
+
+function asyncA(arg1){
+	return new Promise(function(resolve,reject){
+		setTimeout(function(){
+			// returns state to be merged
+			resolve({a: arg1);
+		}, 500)
+	})
+}
+ 
+function asyncB(arg1){
+	return new Promise(function(resolve,reject){
+		setTimeout(function(){
+			// returns state to be merged 
+			resolve({ b: 5 + arg1 });
+		}, 500)
+	})
+}
+
+function asyncFusionator(state, action) {
+
+	switch(action.id){
+		
+	case "simplePromise":
+		return asyncA(action.args[0]); 
+		
+    case "chainedPromises":
+		return asyncA(action.args[0]).then(function(data){
+			console.log(data); // data = {a: 5} 
+			return asyncB(data);  
+		});
+	}
+}
+
+var simplePromise = NanoFlux.createFusionActor(asyncFusionator, "simplePromise");
+var chainedPromises = NanoFlux.createFusionActor(asyncFusionator, "chainedPromises");
+
+// call the actions
+simplePromise(5); // state will be { a: 5 }
+chainedPromises(5); // state will be { a: 5, b: 10 }
+
+```
+ 
+ 
+ TODO
+
 - More examples
 - Doc for project site
 
