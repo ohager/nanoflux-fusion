@@ -21,7 +21,6 @@ function asyncA(){
 	})
 }
 
-
 function asyncB(){
 	return new Promise(function(resolve,reject){
 		setTimeout(function(){
@@ -29,6 +28,17 @@ function asyncB(){
 		}, 500)
 	})
 }
+
+function asyncQ(){
+	var deferred = q.defer();
+
+	setTimeout(function(){
+			deferred.resolve({ q: "fromAsyncQ" });
+	}, 500);
+
+	return deferred.promise;
+}
+
 
 function asyncFusion(state, action) {
 	if (action.id === "test") {
@@ -45,6 +55,9 @@ function asyncFusion(state, action) {
 			console.log(data);
 			return asyncB();
 		});
+	}
+	else if(action.id === "qTest"){
+		return asyncQ();
 	}
 }
 
@@ -85,6 +98,20 @@ describe("NanoFlux Fusion Asynchronous", function () {
 		});
 
 		NanoFlux.createFusionActor(asyncFusion, "chainTest")();
+	});
+
+	it("should be work with Q (A+ compliant promise lib)(async)", function (done) {
+
+		// when calling here, async should already be executed
+		var fusionStore = NanoFlux.getFusionStore();
+
+		subscription = fusionStore.subscribe(this, function(state){
+			expect(state.q).toBe("fromAsyncQ");
+			subscription.unsubscribe();
+			done();
+		});
+
+		NanoFlux.createFusionActor(asyncFusion, "qTest")();
 	});
 
 
