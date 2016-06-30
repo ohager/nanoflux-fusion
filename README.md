@@ -69,6 +69,12 @@ functions the simply return the new state.
 
 ```
 
+## Immutability
+The state passed on notification and/or `getState()` is immutable. Internally, [Object.freeze](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze) 
+is used to (deeply) freeze the state making it immutable. For large nested states this will have an performance impact (tests will be made to quantify). 
+Due to the use of `Object.freeze` the overall performance is not directly comparable with, e.g. nanoflux (which does not guarantee immutability), but should be still fast enough 
+for most scenarios.
+
 ## Asynchronous Actions
 
 *nanoflux-fusion* supports asynchronous actions out-of-the-box. If a Fusionator returns a promise instead of a state object,
@@ -125,7 +131,13 @@ simplePromise(5); // state will be { a: 5 }
 chainedPromises(5); // state will be { a: 5, b: 10 }
 
 ```
- 
+
+## Compatibility
+
+Compatible with: Chrome, Firefox, Opera, Edge 
+
+*nanoflux-fusion* uses internally `Object.assign()` and `Object.freeze()`. While `Object.freeze` is supported since IE9, `Object.assign` was only introduced in EDGE.
+Therefore, you need a [polyfill](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill) for older browsers. 
  
  TODO
 
