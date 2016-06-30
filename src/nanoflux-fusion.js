@@ -67,9 +67,7 @@ nanoflux.createFusionator = function(descriptor){
 
 nanoflux.createFusionActor = function(actorId, fusionatorIndex){
 
-	fusionatorIndex =  fusionatorIndex || 0;
-
-	if(fusionatorIndex >= fusionators.length)  throw "Invalid fusionator handler/index";
+	if(!fusionatorIndex || fusionatorIndex >= fusionators.length)  throw "Invalid fusionator handler/index";
 
 	var fusionator = fusionators[fusionatorIndex];
 

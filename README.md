@@ -37,7 +37,7 @@ functions the simply return the new state.
 		console.log("Items:", state.items);
 	});
 	
-	// the functionator allows the state manipulation
+	// the 'fusionator' is responsible for the state manipulation
 	// it is called with two arguments, the previous state
 	// and an arguments array containing the arguments passed on actor call.
 	var fusionator = NanoFlux.createFusionator({
@@ -51,17 +51,17 @@ functions the simply return the new state.
 			if (!previousState.items || previousState.items.length == 0) return {};
 
 			var items = previousState.items.filter(function (item) {
-				return item.name !== args[0];
+				return item.name !== args[0].name;
 			});
 			return {items: items}
 		}
 	});
 	
-	// creates the fusion actors, which results in our reducer function ("fusionator")
+	// creates the fusion actors
 	var addItem = NanoFlux.createFusionActor("addItem", fusionator);
 	var removeItem = NanoFlux.createFusionActor("removeItem", fusionator);
 	
-	// call the actions
+	// use the actors as simple action functions
 	addItem({ name: "item1", value : 1 });
 	addItem({ name: "item2", value : 2 });
 	
