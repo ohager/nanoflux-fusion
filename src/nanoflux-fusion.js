@@ -35,7 +35,7 @@ function getFusionStoreDefinition(){
 	return {
 		on__fuse : function(args){
 
-			var fusionator = args.fuse.call(null, stateHolder.immutableState, args.action);
+			var fusionator = args.fuse.call(null, stateHolder.immutableState, args.params);
 			if(fusionator.then){ // is promise
 				fusionator.then(fuseState.bind(this));
 			}else{
@@ -50,22 +50,35 @@ function getFusionStoreDefinition(){
 }
 
 
-
 function createFusionStore(){
 	var store = nanoflux.createStore(FUSION_STORE_NAME, getFusionStoreDefinition());
 	nanoflux.createDispatcher(null, ['__fuse']).connectTo(store);
 }
 
 // extend nanoflux interface
+var fusionators = [];
 nanoflux.getFusionStore = function(){ return nanoflux.getStore(FUSION_STORE_NAME) };
-nanoflux.createFusionActor = function(fuseFunc, actorId){
+
+nanoflux.createFusionator = function(descriptor){
+	var ix = fusionators.length;
+	fusionators.push(descriptor);
+	return ix;
+};
+
+nanoflux.createFusionActor = function(actorId, fusionatorIndex){
+
+	fusionatorIndex =  fusionatorIndex || 0;
+
+	if(fusionatorIndex >= fusionators.length)  throw "Invalid fusionator handler/index";
+
+	var fusionator = fusionators[fusionatorIndex];
+
+	if(!fusionator[actorId]) throw "No fusionator with name '" + actorId + "' registered";
+
 	return function(){
 		nanoflux.getDispatcher().__fuse({
-			fuse: fuseFunc,
-			action: {
-				id : actorId,
-				args : arguments
-			}
+			fuse: fusionator[actorId],
+			params: arguments
 		})
 	}
 };
@@ -75,6 +88,7 @@ var baseReset = nanoflux.reset;
 nanoflux.reset = function(){
 	baseReset();
 	createFusionStore();
+	fusionators = [];
 };
 
 createFusionStore();

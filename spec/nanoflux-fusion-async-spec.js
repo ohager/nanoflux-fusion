@@ -58,37 +58,38 @@ function asyncBluebird(){
 	})
 }
 
-function asyncFusion(state, action) {
-	if (action.id === "test") {
+var asyncFusionatorDecriptor = {
+	test: function(state, args) {
 		return new Promise(function(resolve, reject){
 			// simulating async operation
 			setTimeout(function(){
 				// resolve to new state
-				resolve({a: action.args[0], b: action.args[1]});
+				resolve({a: args[0], b: args[1]});
 			}, ASNYC_DELAY_MS);
 		});
-	}
-	else if(action.id === "chainTest"){
+	},
+	chainTest: function() {
 		return asyncA().then(function(data){
 			return asyncB();
 		});
-	}
-	else if(action.id === "qTest"){
+	},
+	qTest: function() {
 		return asyncQ();
-	}
-	else if(action.id === "rsvpTest"){
+	},
+	rsvpTest: function() {
 		return asyncRSVP();
-	}
-	else if(action.id === "bluebirdTest"){
+	},
+	bluebirdTest: function() {
 		return asyncBluebird();
 	}
-}
-
+};
+var asyncFusionator;
 
 describe("NanoFlux Fusion Asynchronous", function () {
 
 	beforeEach(function () {
 		NanoFlux.reset();
+		asyncFusionator = NanoFlux.createFusionator(asyncFusionatorDecriptor);
 	});
 
 	it("should be able to deal with Promises as FusionActor (async)", function (done) {
@@ -104,7 +105,7 @@ describe("NanoFlux Fusion Asynchronous", function () {
 			done();
 		});
 
-		var testActor = NanoFlux.createFusionActor(asyncFusion, "test");
+		var testActor = NanoFlux.createFusionActor("test", asyncFusionator);
 
 		testActor("someValue", {foo: "foo", bar: 123});
 	});
@@ -120,7 +121,7 @@ describe("NanoFlux Fusion Asynchronous", function () {
 			done();
 		});
 
-		NanoFlux.createFusionActor(asyncFusion, "chainTest")();
+		NanoFlux.createFusionActor("chainTest", asyncFusionator)();
 	});
 
 	it("should work with Q (A+ compliant promise lib)(async)", function (done) {
@@ -134,7 +135,7 @@ describe("NanoFlux Fusion Asynchronous", function () {
 			done();
 		});
 
-		NanoFlux.createFusionActor(asyncFusion, "qTest")();
+		NanoFlux.createFusionActor("qTest", asyncFusionator)();
 	});
 
 	it("should work with RSVP (A+ compliant promise lib)(async)", function (done) {
@@ -148,7 +149,7 @@ describe("NanoFlux Fusion Asynchronous", function () {
 			done();
 		});
 
-		NanoFlux.createFusionActor(asyncFusion, "rsvpTest")();
+		NanoFlux.createFusionActor("rsvpTest", asyncFusionator)();
 	});
 
 	it("should work with Bluebird (A+ compliant promise lib)(async)", function (done) {
@@ -162,7 +163,7 @@ describe("NanoFlux Fusion Asynchronous", function () {
 			done();
 		});
 
-		NanoFlux.createFusionActor(asyncFusion, "bluebirdTest")();
+		NanoFlux.createFusionActor("bluebirdTest", asyncFusionator)();
 	});
 
 
@@ -170,18 +171,18 @@ describe("NanoFlux Fusion Asynchronous", function () {
 
 		var fusionStore = NanoFlux.getFusionStore();
 
-		function fusionatorA(state, action) {
-			if (action.id === "actionA") {
-				return {a: action.args[0]}
+		var fusionator = NanoFlux.createFusionator({
+			actionA : function(state, args){
+				return {a: args[0]}
 			}
-		}
+		});
 
 		var subscription = fusionStore.subscribe(this, function (state) {
 			expect(state.a).toBe("fromActionA");
 			done();
 		});
 
-		var actorA = NanoFlux.createFusionActor(fusionatorA, "actionA");
+		var actorA = NanoFlux.createFusionActor("actionA", fusionator);
 		var actions = NanoFlux.createActions('action', null, {
 				test: function (a) {
 					setTimeout(actorA.bind(null, a), ASNYC_DELAY_MS)

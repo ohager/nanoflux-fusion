@@ -37,30 +37,29 @@ functions the simply return the new state.
 		console.log("Items:", state.items);
 	});
 	
-	// this function allows the state manipulation
+	// the functionator allows the state manipulation
 	// it is called with two arguments, the previous state
-	// and an action object of the following structure:
-	// { id: <actionId>, args : <array of arguments> }
-	function myFusionator(previousState, action){
-	
-		switch(action.id){
-			case "addItem":
-				var currentItems = previousState.items ? previousState.items.slice() :[] ;
-				currentItems.push(action.args[0]);
-				return { items : currentItems };
-			case "removeItem":
-				if (!previousState.items || previousState.items.length == 0) return {};
-	
-				var items = previousState.items.filter(function (item) {
-					return item.name !== action.args[0];
-				});
-				return {items: items}
+	// and an arguments array containing the arguments passed on actor call.
+	var fusionator = NanoFlux.createFusionator({
+		
+		addItem : function(previousState, args){
+			var currentItems = previousState.items ? previousState.items.slice() :[] ;
+			currentItems.push(args[0]);
+			return { items : currentItems };
+		},
+		removeItem : function(previousState, args){
+			if (!previousState.items || previousState.items.length == 0) return {};
+
+			var items = previousState.items.filter(function (item) {
+				return item.name !== args[0];
+			});
+			return {items: items}
 		}
-	}
+	});
 	
 	// creates the fusion actors, which results in our reducer function ("fusionator")
-	var addItem = NanoFlux.createFusionActor(myFusionator, "addItem");
-	var removeItem = NanoFlux.createFusionActor(myFusionator, "removeItem");
+	var addItem = NanoFlux.createFusionActor("addItem", fusionator);
+	var removeItem = NanoFlux.createFusionActor("removeItem", fusionator);
 	
 	// call the actions
 	addItem({ name: "item1", value : 1 });
@@ -70,7 +69,7 @@ functions the simply return the new state.
 
 ```
 
-##Asynchronous Actions
+## Asynchronous Actions
 
 *nanoflux-fusion* supports asynchronous actions out-of-the-box. If a Fusionator returns a promise instead of a state object,
 the promise will be executed. The state shall be passed as argument of the resolver. Chaining is also possible. 
@@ -105,23 +104,21 @@ function asyncB(arg1){
 	})
 }
 
-function asyncFusionator(state, action) {
-
-	switch(action.id){
-		
-	case "simplePromise":
-		return asyncA(action.args[0]); 
-		
-	case "chainedPromises":
-		return asyncA(action.args[0]).then(function(data){
+var asyncFusionator = NanoFlux.createFusionator({
+	
+	simplePromise: function(prevState, args){
+			return asyncA(args[0]); 
+	}	
+	chainedPromises: function(prevState, args){
+		return asyncA(args[0]).then(function(data){
 			console.log(data); // data = {a: 5} 
 			return asyncB(data);  
 		});
 	}
-}
+});
 
-var simplePromise = NanoFlux.createFusionActor(asyncFusionator, "simplePromise");
-var chainedPromises = NanoFlux.createFusionActor(asyncFusionator, "chainedPromises");
+var simplePromise = NanoFlux.createFusionActor("simplePromise", asyncFusionator);
+var chainedPromises = NanoFlux.createFusionActor("chainedPromises", asyncFusionator);
 
 // call the actions
 simplePromise(5); // state will be { a: 5 }

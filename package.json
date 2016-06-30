@@ -1,7 +1,7 @@
 {
   "name": "nanoflux-fusion",
   "description": "nanoflux fusion is a redux-like extension for nanoflux",
-  "version": "0.1.5-alpha",
+  "version": "0.2.0-alpha",
   "author": "Oliver Hager",
   "email": "oliver@devbutze.com",
   "private": false,
@@ -11,7 +11,13 @@
   },
   "keywords": [
     "flux",
-    "redux"
+    "redux",
+    "react",
+    "riotjs",
+    "angular2",
+    "ng2",
+    "polymer",
+    "webcomponents"
   ],
   "dependencies": {
     "nanoflux": "latest"
@@ -35,6 +41,7 @@
     "run-sequence": "^0.3.2"
   },
   "scripts": {
-    "test": "node ./node_modules/jasmine-node/lib/jasmine-node/cli.js ./spec --verbose"
+    "test": "node ./node_modules/jasmine-node/lib/jasmine-node/cli.js ./spec --verbose",
+    "benchmark": "node ./perf/benchmark.js"
   }
 }
