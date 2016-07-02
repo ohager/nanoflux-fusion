@@ -263,6 +263,7 @@ module.exports = _dereq_('./dist/nanoflux');
 var nanoflux = _dereq_('nanoflux');
 
 var FUSION_STORE_NAME = "__fusionStore__";
+var DEFAULT_FUSIONATOR_NAME = "__defaultFusionator__";
 
 function getFusionStoreDefinition(){
 
@@ -321,10 +322,38 @@ function createFusionStore(){
 var fusionators = [];
 nanoflux.getFusionStore = function(){ return nanoflux.getStore(FUSION_STORE_NAME) };
 
-nanoflux.createFusionator = function(descriptor){
-	var ix = fusionators.length;
-	fusionators.push(descriptor);
-	return ix;
+function createFusionActor(descriptor, actorId){
+	return function(){
+		nanoflux.getDispatcher().__fuse({
+			fuse: descriptor[actorId],
+			params: arguments
+		})
+	}
+}
+
+
+nanoflux.createFusionator = function(descriptor, fusionatorName){
+	var fusionator = {
+		descriptor : descriptor,
+		actors : {}
+	};
+
+	fusionators[fusionatorName || DEFAULT_FUSIONATOR_NAME] = fusionator;
+
+	for(funcName in descriptor){
+		if(descriptor.hasOwnProperty(funcName)){
+			fusionator.actors[funcName] = createFusionActor(descriptor,funcName);
+		}
+	}
+};
+
+nanoflux.getFusionActor = function(actorName, fusionatorName){
+	fusionatorName =  fusionatorName || DEFAULT_FUSIONATOR_NAME;
+	var fusionator = fusionators[fusionatorName];
+	if(!fusionator)  throw "Fusionator with name '" + fusionatorName + "' is not defined";
+	var actor = fusionator.actors[actorName];
+	if(!actor) throw "Actor with name '" + actorName + "' is not defined for fusionator '" + fusionatorName;
+	return actor;
 };
 
 nanoflux.createFusionActor = function(actorId, fusionatorIndex){

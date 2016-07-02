@@ -1,7 +1,7 @@
 {
   "name": "nanoflux-fusion",
-  "description": "nanoflux fusion is a redux-like extension for nanoflux",
-  "version": "0.2.0-alpha",
+  "description": "nanoflux fusion is a redux-inspired extension for nanoflux",
+  "version": "0.2.1-alpha",
   "author": "Oliver Hager",
   "email": "oliver@devbutze.com",
   "private": false,

@@ -83,13 +83,12 @@ var asyncFusionatorDecriptor = {
 		return asyncBluebird();
 	}
 };
-var asyncFusionator;
 
 describe("NanoFlux Fusion Asynchronous", function () {
 
 	beforeEach(function () {
 		NanoFlux.reset();
-		asyncFusionator = NanoFlux.createFusionator(asyncFusionatorDecriptor);
+		NanoFlux.createFusionator(asyncFusionatorDecriptor);
 	});
 
 	it("should be able to deal with Promises as FusionActor (async)", function (done) {
@@ -105,7 +104,7 @@ describe("NanoFlux Fusion Asynchronous", function () {
 			done();
 		});
 
-		var testActor = NanoFlux.createFusionActor("test", asyncFusionator);
+		var testActor = NanoFlux.getFusionActor("test");
 
 		testActor("someValue", {foo: "foo", bar: 123});
 	});
@@ -121,7 +120,7 @@ describe("NanoFlux Fusion Asynchronous", function () {
 			done();
 		});
 
-		NanoFlux.createFusionActor("chainTest", asyncFusionator)();
+		NanoFlux.getFusionActor("chainTest")();
 	});
 
 	it("should work with Q (A+ compliant promise lib)(async)", function (done) {
@@ -135,7 +134,7 @@ describe("NanoFlux Fusion Asynchronous", function () {
 			done();
 		});
 
-		NanoFlux.createFusionActor("qTest", asyncFusionator)();
+		NanoFlux.getFusionActor("qTest")();
 	});
 
 	it("should work with RSVP (A+ compliant promise lib)(async)", function (done) {
@@ -149,7 +148,7 @@ describe("NanoFlux Fusion Asynchronous", function () {
 			done();
 		});
 
-		NanoFlux.createFusionActor("rsvpTest", asyncFusionator)();
+		NanoFlux.getFusionActor("rsvpTest")();
 	});
 
 	it("should work with Bluebird (A+ compliant promise lib)(async)", function (done) {
@@ -163,7 +162,7 @@ describe("NanoFlux Fusion Asynchronous", function () {
 			done();
 		});
 
-		NanoFlux.createFusionActor("bluebirdTest", asyncFusionator)();
+		NanoFlux.getFusionActor("bluebirdTest")();
 	});
 
 
@@ -182,7 +181,7 @@ describe("NanoFlux Fusion Asynchronous", function () {
 			done();
 		});
 
-		var actorA = NanoFlux.createFusionActor("actionA", fusionator);
+		var actorA = NanoFlux.getFusionActor("actionA");
 		var actions = NanoFlux.createActions('action', null, {
 				test: function (a) {
 					setTimeout(actorA.bind(null, a), ASNYC_DELAY_MS)

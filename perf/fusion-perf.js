@@ -2,7 +2,7 @@
 var PerfTest = require('../perf/perftest');
 var NanoFlux = require('../dist/nanoflux-fusion.min');
 
-var fusionator = NanoFlux.createFusionator({
+NanoFlux.createFusionator({
 	action1 : function(state, args){
 		return { a: args[0] };
 	},
@@ -11,11 +11,10 @@ var fusionator = NanoFlux.createFusionator({
 	}
 });
 
-
 module.exports = PerfTest.createPerfTest('nanoflux-fusion-perf', {
 	fusionStore : NanoFlux.getFusionStore(),
-	actor1 :   NanoFlux.createFusionActor('action1', fusionator),
-	actor2 :   NanoFlux.createFusionActor('action2', fusionator),
+	actor1 :   NanoFlux.getFusionActor('action1'),
+	actor2 :   NanoFlux.getFusionActor('action2'),
 
    before : function(){
 

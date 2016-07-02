@@ -1,7 +1,6 @@
 [![Build Status](https://travis-ci.org/ohager/nanoflux-fusion.svg?branch=master)](https://travis-ci.org/ohager/nanoflux-fusion)
 
 
-
 # nanoflux-fusion
 
 [__PROJECT SITE__](http://ohager.github.io/nanoflux/)
@@ -40,7 +39,7 @@ functions the simply return the new state.
 	// the 'fusionator' is responsible for the state manipulation
 	// it is called with two arguments, the previous state
 	// and an arguments array containing the arguments passed on actor call.
-	var fusionator = NanoFlux.createFusionator({
+	NanoFlux.createFusionator({
 		
 		addItem : function(previousState, args){
 			var currentItems = previousState.items ? previousState.items.slice() :[] ;
@@ -57,9 +56,9 @@ functions the simply return the new state.
 		}
 	});
 	
-	// creates the fusion actors
-	var addItem = NanoFlux.createFusionActor("addItem", fusionator);
-	var removeItem = NanoFlux.createFusionActor("removeItem", fusionator);
+	// gets the fusion actors, i.e. have the same name as defined above
+	var addItem = NanoFlux.getFusionActor("addItem");
+	var removeItem = NanoFlux.getFusionActor("removeItem");
 	
 	// use the actors as simple action functions
 	addItem({ name: "item1", value : 1 });
@@ -123,8 +122,8 @@ var asyncFusionator = NanoFlux.createFusionator({
 	}
 });
 
-var simplePromise = NanoFlux.createFusionActor("simplePromise", asyncFusionator);
-var chainedPromises = NanoFlux.createFusionActor("chainedPromises", asyncFusionator);
+var simplePromise = NanoFlux.getFusionActor("simplePromise");
+var chainedPromises = NanoFlux.getFusionActor("chainedPromises");
 
 // call the actions
 simplePromise(5); // state will be { a: 5 }
