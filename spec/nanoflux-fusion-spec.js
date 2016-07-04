@@ -75,7 +75,7 @@ describe("NanoFlux Fusion", function () {
 
 	});
 
-	it("should work with multiple fusionators", function () {
+	it("should work with multiple fusionators (namespaces)", function () {
 
 		var fusionStore = NanoFlux.getFusionStore();
 
@@ -103,6 +103,42 @@ describe("NanoFlux Fusion", function () {
 		// first fusionator
 		var fusionatorAActor = NanoFlux.getFusionActor("actionA", "fusionatorA");
 		var fusionatorBActor = NanoFlux.getFusionActor("actionB", "fusionatorB");
+
+		fusionatorAActor("fromFusionatorA");
+		fusionatorBActor("fromFusionatorB");
+
+		subscription.unsubscribe();
+
+	});
+
+	it("should work with multiple fusionators without naming collision (namespaces)", function () {
+
+		var fusionStore = NanoFlux.getFusionStore();
+
+		var fusionatorA = NanoFlux.createFusionator({
+			actionA : function (state, args){
+				return {a: args[0]}
+			}
+		}, "fusionatorA");
+
+		var fusionatorB = NanoFlux.createFusionator({
+			actionA : function(state, args) {
+				return {b: args[0]}
+			}
+		}, "fusionatorB");
+
+		var subscription = fusionStore.subscribe(this, function (state) {
+			if (state.a) {
+				expect(state.a).toBe("fromFusionatorA");
+			}
+			if (state.b) {
+				expect(state.b).toBe("fromFusionatorB");
+			}
+		});
+
+		// first fusionator
+		var fusionatorAActor = NanoFlux.getFusionActor("actionA", "fusionatorA");
+		var fusionatorBActor = NanoFlux.getFusionActor("actionA", "fusionatorB");
 
 		fusionatorAActor("fromFusionatorA");
 		fusionatorBActor("fromFusionatorB");

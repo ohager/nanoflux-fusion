@@ -1,10 +1,17 @@
 var PerfRunner = require('../perf/perfrunner');
 var fusionPerf = require('../perf/fusion-perf');
-// TODO: test for huge state!
-//var fusionPerfHugeState = require('../perf/fusion-perf-huge');
+var fusionPerfHugeStateR1A1 = require('../perf/fusion-hugestate-perf-R1A1');
+var fusionPerfHugeStateR1A10 = require('../perf/fusion-hugestate-perf-R1A10');
+var fusionPerfHugeStateR2A10 = require('../perf/fusion-hugestate-perf-R2A10');
+var fusionPerfHugeStateRefs = require('../perf/fusion-hugestate-perf-referencedstate');
 
-new PerfRunner().startBenchmark([
-	fusionPerf
-]);
+var tests = [
+	fusionPerf,
+	fusionPerfHugeStateR1A1,
+	fusionPerfHugeStateR1A10,
+	fusionPerfHugeStateR2A10
+];
+
+new PerfRunner().startBenchmark( tests );
 
 
