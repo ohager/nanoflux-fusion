@@ -1,7 +1,7 @@
 {
   "name": "nanoflux-fusion",
-  "description": "nanoflux fusion is a redux-inspired extension for nanoflux",
-  "version": "0.2.1-alpha",
+  "description": "nanoflux fusion is a redux-inspired application state manager based on nanoflux",
+  "version": "0.3.0-beta",
   "author": "Oliver Hager",
   "email": "oliver@devbutze.com",
   "private": false,
@@ -42,7 +42,7 @@
   },
   "scripts": {
     "test": "node ./node_modules/jasmine-node/lib/jasmine-node/cli.js ./spec --verbose",
-    "benchmark": "node ./perf/benchmark.js",
+    "benchmark": "node --expose-gc ./perf/benchmark.js",
     "benchmark-huge": "node --expose-gc ./perf/benchmark-hugestate.js"
   }
 }
