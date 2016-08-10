@@ -45,6 +45,9 @@ function getFusionStoreDefinition(){
 		},
 		getState : function(){
 			return stateHolder.immutableState;
+		},
+		setState : function(state){
+			fuseState(state);
 		}
 	}
 }
@@ -76,7 +79,7 @@ nanoflux.createFusionator = function(descriptor, fusionatorName, initialState){
 		descriptor : descriptor,
 		actors : {}
 	};
-	//fuseState(initialState);
+	nanoflux.getFusionStore().setState(initialState);
 	fusionators[fusionatorName || DEFAULT_FUSIONATOR_NAME] = fusionator;
 
 	for(funcName in descriptor){
