@@ -10,7 +10,7 @@ nanofluxDir = "../src/nanoflux-fusion";
 
 var NanoFlux = require(nanofluxDir);
 
-describe("NanoFlux Fusion", function () {
+describe("NanoFlux Fusion Immutability", function () {
 
 	beforeEach(function () {
 		NanoFlux.reset();
@@ -38,6 +38,12 @@ describe("NanoFlux Fusion", function () {
 		NanoFlux.createFusionator({
 			test : function(state, args) {
 				return {a: args[0], b: args[1]}
+			}
+		}, {
+			a: "",
+			b : {
+				foo : "",
+				bar : 0
 			}
 		});
 		var testActor = NanoFlux.getFusionActor("test");
@@ -68,6 +74,9 @@ describe("NanoFlux Fusion", function () {
 			test : function(state, args) {
 				return {a: [ args[0], args[1] ]}
 			}
+		},
+		{
+			a : []
 		});
 		var testActor = NanoFlux.getFusionActor("test");
 		testActor("someValue", {foo: "foo", bar: 123});

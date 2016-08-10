@@ -50,10 +50,14 @@ functions the simply return the new state.
 			if (!previousState.items || previousState.items.length == 0) return {};
 
 			var items = previousState.items.filter(function (item) {
-				return item.name !== args[0].name;
+				return item.name !== args[0];
 			});
 			return {items: items}
 		}
+	}, 
+	// define an initial state!
+	{
+	 items: []	
 	});
 	
 	// gets the fusion actors, i.e. have the same name as defined above
@@ -94,7 +98,7 @@ function asyncA(arg1){
 	return new Promise(function(resolve,reject){
 		setTimeout(function(){
 			// returns state to be merged
-			resolve({a: arg1);
+			resolve({a: arg1});
 		}, 500)
 	})
 }
@@ -102,9 +106,7 @@ function asyncA(arg1){
 function asyncB(arg1){
 	return new Promise(function(resolve,reject){
 		setTimeout(function(){
-			var newState = arg1;
-			newState.b = 5 + arg1.a;
-			resolve(newState);
+			resolve( { b: 5 + arg1.a });
 		}, 500)
 	})
 }
@@ -113,13 +115,18 @@ var asyncFusionator = NanoFlux.createFusionator({
 	
 	simplePromise: function(prevState, args){
 			return asyncA(args[0]); 
-	}	
+	},	
 	chainedPromises: function(prevState, args){
 		return asyncA(args[0]).then(function(data){
 			console.log(data); // data = {a: 5} 
 			return asyncB(data);  
 		});
 	}
+}, 
+// initial state
+{
+	a: 0,
+	b: 0
 });
 
 var simplePromise = NanoFlux.getFusionActor("simplePromise");
@@ -138,9 +145,4 @@ Compatible with: Chrome, Firefox, Opera, Edge
 *nanoflux-fusion* uses internally `Object.assign()` and `Object.freeze()`. While `Object.freeze` is supported since IE9, `Object.assign` was only introduced in EDGE.
 Therefore, you need a [polyfill](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill) for older browsers. 
  
- TODO
-
-- More examples
-- Doc for project site
-
 

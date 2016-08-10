@@ -17,7 +17,6 @@ function getFusionStoreDefinition(){
 		return Object.freeze(obj);
 	}
 
-
 	var stateHolder = {
 		immutableState : null,
 		setState : function(newState){
@@ -26,11 +25,12 @@ function getFusionStoreDefinition(){
 		}
 	};
 
-	function fuseState(newState){
+	function fuseState(newState, dontNotify){
 		var state = {};
 		Object.assign(state, stateHolder.immutableState, newState);
 		stateHolder.setState(state);
-		this.notify(stateHolder.immutableState);
+		if(!dontNotify)
+			this.notify(stateHolder.immutableState);
 	}
 
 	return {
@@ -41,13 +41,12 @@ function getFusionStoreDefinition(){
 			}else{
 				fuseState.call(this, fusionator);
 			}
-
+		},
+		__initState : function(state){
+			fuseState.call(this,state,true);
 		},
 		getState : function(){
 			return stateHolder.immutableState;
-		},
-		setState : function(state){
-			fuseState(state);
 		}
 	}
 }
@@ -73,13 +72,18 @@ function createFusionActor(descriptor, actorId, initialState){
 	}
 }
 
+function initializeState(initialState){
+	var initializeActor = createFusionActor("_")
+}
 
-nanoflux.createFusionator = function(descriptor, fusionatorName, initialState){
+nanoflux.createFusionator = function(descriptor, initialState, fusionatorName) {
 	var fusionator = {
-		descriptor : descriptor,
-		actors : {}
+		descriptor: descriptor,
+		actors: {}
 	};
-	nanoflux.getFusionStore().setState(initialState);
+	if (!initialState) throw "You must specify an initial state";
+
+	nanoflux.getFusionStore().__initState(initialState);
 	fusionators[fusionatorName || DEFAULT_FUSIONATOR_NAME] = fusionator;
 
 	for(funcName in descriptor){
