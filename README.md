@@ -1,11 +1,11 @@
 [![Build Status](https://travis-ci.org/ohager/nanoflux-fusion.svg?branch=master)](https://travis-ci.org/ohager/nanoflux-fusion)
-
+[![npm version](https://img.shields.io/npm/v/nanoflux-fusion.svg?style=flat-square)](https://www.npmjs.com/package/nanoflux-fusion)
 
 # nanoflux-fusion
 
 [__PROJECT SITE__](http://ohager.github.io/nanoflux/)
 
-> Note: This is still a very early version and considered as a developer preview
+> Note: Fusion is still in beta, being tested on some real world examples. You may use it already. If you encounter issues feel free to report them! 
 
 A Redux-like extension for Nanoflux.
 
