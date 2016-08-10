@@ -22,6 +22,38 @@ describe("NanoFlux Fusion", function () {
 		expect(NanoFlux.createFusionator).toBeDefined();
 	});
 
+	it("should initialize state with initial state", function () {
+
+		var fusionStore = NanoFlux.getFusionStore();
+
+		var subscription = fusionStore.subscribe(this, function (state) {
+			expect(state.a).toBe("default");
+			expect(state.b.foo).toBe("foo");
+			expect(state.b.bar).toBe(0);
+		});
+
+
+		NanoFlux.createFusionator({
+			test : function(state, args) {
+				return state;
+			}
+		},
+			null,
+		{
+			a :  "default",
+			b: { foo: "foo", bar: 0}
+		});
+
+		var fusionStore = NanoFlux.getFusionStore();
+
+		var testActor = NanoFlux.getFusionActor("test");
+		testActor();
+
+		subscription.unsubscribe();
+
+
+	});
+
 	it("should use FusionActor 'test', fuse state and notify subscriber", function () {
 
 		var fusionStore = NanoFlux.getFusionStore();
@@ -155,11 +187,11 @@ describe("NanoFlux Fusion", function () {
 			}
 		});
 
-		expect(NanoFlux.createFusionActor.bind(null,"actionA")).toThrow();
+		expect(NanoFlux.getFusionActor.bind(null,"actionA")).toThrow();
 	});
 
 	it("should throw exception on invalid fusionator", function () {
-		expect(NanoFlux.createFusionActor.bind(null,"actionB", "unknown")).toThrow();
+		expect(NanoFlux.getFusionActor.bind(null,"actionB", "unknown")).toThrow();
 	});
 
 });
