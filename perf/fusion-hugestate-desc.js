@@ -38,7 +38,12 @@ return {
 				action2 : function(state, args){
 					return that.hugeState;
 				}
-			});
+			},
+			{
+				a: null,
+				rec : {}
+			}
+			);
 
 			this.actor1 = NanoFlux.getFusionActor('action1');
 			this.actor2 = NanoFlux.getFusionActor('action2');

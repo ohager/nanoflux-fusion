@@ -9,6 +9,10 @@ NanoFlux.createFusionator({
 	action2 : function(state, args){
 		return { b: args[0] };
 	}
+},
+{
+	a: null,
+	b : null
 });
 
 module.exports = PerfTest.createPerfTest('nanoflux-fusion-perf', {
