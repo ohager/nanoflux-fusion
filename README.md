@@ -145,9 +145,7 @@ chainedPromises(5); // state will be { a: 5, b: 10 }
 
 ## Compatibility
 
-Compatible with: Chrome, Firefox, Opera, Edge 
-
-*nanoflux-fusion* uses internally `Object.assign()` and `Object.freeze()`. While `Object.freeze` is supported since IE9, `Object.assign` was only introduced in EDGE.
-Therefore, you need a [polyfill](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill) for older browsers. 
+It should be compatible with all major modern browsers. *nanoflux-fusion* uses internally `Object.assign()` and `Object.freeze()`. While `Object.freeze` is supported since IE9, `Object.assign` was only introduced in EDGE.
+Therefore, you need a [polyfill](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill) for unsupported browsers, i.e. IE9+. 
  
 
