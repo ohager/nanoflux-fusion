@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/ohager/nanoflux-fusion.svg?branch=master)](https://travis-ci.org/ohager/nanoflux-fusion)
 [![npm version](https://img.shields.io/npm/v/nanoflux-fusion.svg?style=flat-square)](https://www.npmjs.com/package/nanoflux-fusion)
+[![GetBadges Game](http://ohager-nanoflux-fusion.getbadges.io/shield/company/ohager-nanoflux-fusion/user/8773)](https://ohager-nanoflux-fusion.getbadges.io/?ref=shield-player)
 
 # nanoflux-fusion
 
