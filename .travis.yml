@@ -1,7 +1,8 @@
 language: node_js
 node_js:
   - "4.4"
-
+notifications:
+  webhooks: https://ohager-nanoflux-fusion.getbadges.io/api/app/webhook/2ce7adc5-8afc-4069-81ed-bd2398117aea
 before_script:
   - npm install -g gulp
 script: gulp
