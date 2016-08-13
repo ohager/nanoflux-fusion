@@ -42,13 +42,18 @@ functions the simply return the new state.
 	NanoFlux.createFusionator({
 		
 		addItem : function(previousState, args){
-			var currentItems = previousState.items ? previousState.items.slice() :[] ;
+			// the previous state is frozen/immutable, so we need to copy the items to update the list
+			var currentItems = previousState.items.slice(); 
 			currentItems.push(args[0]);
+			// we don't need to return the entire state. 
+			// A partial state will be merged
+			// As builtin feature, the new state is being frozen (deeply)
 			return { items : currentItems };
 		},
 		removeItem : function(previousState, args){
-			if (!previousState.items || previousState.items.length == 0) return {};
+			if (previousState.items.length == 0) return {};
 
+			// note: filter creates a copy already 
 			var items = previousState.items.filter(function (item) {
 				return item.name !== args[0];
 			});
