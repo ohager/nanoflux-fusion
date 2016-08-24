@@ -17,6 +17,8 @@ function getFusionStoreDefinition(){
 		return Object.freeze(obj);
 	}
 
+	var middleware = [];
+
 	var stateHolder = {
 		immutableState : null,
 		setState : function(newState){
@@ -25,16 +27,21 @@ function getFusionStoreDefinition(){
 		}
 	};
 
-	function fuseState(newState, dontNotify){
+	function fuseState(newState, doNotNotify){
 		var state = {};
 		Object.assign(state, stateHolder.immutableState, newState);
 		stateHolder.setState(state);
-		if(!dontNotify)
+		if(!doNotNotify)
 			this.notify(stateHolder.immutableState);
 	}
 
 	return {
 		on__fuse : function(args){
+
+			for(var i = 0; i < middleware.length; ++i){
+				middleware[i].call(this, stateHolder.immutableState, args.params)
+			}
+
 			var fusionator = args.fuse.call(null, stateHolder.immutableState, args.params);
 			if(fusionator.then){ // is promise
 				fusionator.then(fuseState.bind(this));
@@ -44,6 +51,9 @@ function getFusionStoreDefinition(){
 		},
 		__initState : function(state){
 			fuseState.call(this,state,true);
+		},
+		use: function(fn){
+			middleware.push(fn);
 		},
 		getState : function(){
 			return stateHolder.immutableState;
@@ -70,10 +80,6 @@ function createFusionActor(descriptor, actorId, initialState){
 			params: arguments
 		})
 	}
-}
-
-function initializeState(initialState){
-	var initializeActor = createFusionActor("_")
 }
 
 nanoflux.createFusionator = function(descriptor, initialState, fusionatorName) {
