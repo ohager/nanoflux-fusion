@@ -1,5 +1,4 @@
 var nanoflux = require('nanoflux');
-
 var FUSION_STORE_NAME = "__fusionStore__";
 var DEFAULT_FUSIONATOR_NAME = "__defaultFusionator__";
 
@@ -17,6 +16,8 @@ function getFusionStoreDefinition(){
 		return Object.freeze(obj);
 	}
 
+
+
 	var middleware = [];
 
 	var stateHolder = {
@@ -27,20 +28,28 @@ function getFusionStoreDefinition(){
 		}
 	};
 
-	function fuseState(newState, doNotNotify){
+	function callMiddlewares(newState){
+		var mutableState = newState;
+		for(var i = 0; i < middleware.length; ++i){
+			mutableState = middleware[i].call(this, mutableState, stateHolder.immutableState);
+		}
+		return mutableState;
+	}
+
+	function fuseState(newState, isInitialization){
 		var state = {};
+
+		if(!isInitialization)
+			newState = callMiddlewares.call(this, newState);
+
 		Object.assign(state, stateHolder.immutableState, newState);
 		stateHolder.setState(state);
-		if(!doNotNotify)
+		if(!isInitialization)
 			this.notify(stateHolder.immutableState);
 	}
 
 	return {
 		on__fuse : function(args){
-
-			for(var i = 0; i < middleware.length; ++i){
-				middleware[i].call(this, stateHolder.immutableState, args.params)
-			}
 
 			var fusionator = args.fuse.call(null, stateHolder.immutableState, args.params);
 			if(fusionator.then){ // is promise
@@ -48,6 +57,7 @@ function getFusionStoreDefinition(){
 			}else{
 				fuseState.call(this, fusionator);
 			}
+
 		},
 		__initState : function(state){
 			fuseState.call(this,state,true);

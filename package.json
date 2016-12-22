@@ -45,6 +45,6 @@
     "benchmark": "node --expose-gc ./perf/benchmark.js",
     "benchmark-huge": "node --expose-gc ./perf/benchmark-hugestate.js",
     "build": "gulp",
-    "release" : "npm run build && npm publish"
+    "release": "npm run build && npm publish"
   }
 }

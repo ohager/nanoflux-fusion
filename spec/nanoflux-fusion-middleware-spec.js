@@ -10,22 +10,33 @@ nanofluxDir = "../src/nanoflux-fusion";
 
 var NanoFlux = require(nanofluxDir);
 
-function Logger(){
+function LoggerMiddleware(){
 	var logData = [];
 
-	this.log = function(state, args){
+	this.log = function(newState, oldState){
 		logData.push({
-			t: log.length,
-			args: args[0],
-			a: state.a,
-			b: state.b
+			new: newState,
+			old: oldState
 		});
+
+		return newState;
 	};
 
 	this.isEmpty = function(){ return logData.length === 0 };
 
 	this.getLogEntry = function(t){
 		return logData[t];
+	};
+}
+
+function ModifyingMiddleware(propName, value){
+	this.modify = function(newState, oldState){
+
+		var modifiedState = {};
+		modifiedState[propName] = value;
+
+		Object.assign(newState, modifiedState);
+		return newState;
 	};
 }
 
@@ -36,11 +47,11 @@ describe("NanoFlux Fusion Middleware", function () {
 		NanoFlux.reset();
 	});
 
-	it("should add and execute single middlewares", function () {
+	it("should add and execute single non-modifying middleware", function () {
 
 		var fusionStore = NanoFlux.getFusionStore();
 
-		var logger = new Logger();
+		var logger = new LoggerMiddleware();
 		fusionStore.use( logger.log );
 
 		var subscription = fusionStore.subscribe(this, function (state) {
@@ -48,16 +59,18 @@ describe("NanoFlux Fusion Middleware", function () {
 			expect(logger.isEmpty()).toBeFalsy();
 
 			var entry = logger.getLogEntry(0);
-			expect(entry.args).toBe("fromA");
-			expect(entry.a).toBe("");
-			expect(entry.b).toBe(0);
+			expect(entry.old.a).toBe("");
+			expect(entry.old.b).toBe(0);
+			expect(entry.new.a).toBe("fromA");
+			expect(entry.new.b).toBeUndefined();
 
 			entry = logger.getLogEntry(1);
 			if(entry)
 			{
-				expect(entry.args).toBe(42);
-				expect(entry.a).toBe("fromA");
-				expect(entry.b).toBe(0);
+				expect(entry.old.a).toBe("fromA");
+				expect(entry.old.b).toBe(0);
+				expect(entry.new.b).toBe(42);
+				expect(entry.new.a).toBeUndefined();
 			}
 
 		});
@@ -79,6 +92,36 @@ describe("NanoFlux Fusion Middleware", function () {
 
 		testActorA("fromA");
 		testActorB(42);
+
+		subscription.unsubscribe();
+
+	});
+
+	it("should add and execute multiple state modifying middleware", function () {
+
+		var fusionStore = NanoFlux.getFusionStore();
+
+		var modifierMeta = new ModifyingMiddleware("meta", "Applied");
+		var modifierFoo = new ModifyingMiddleware("foo", {bar: 42});
+		fusionStore.use( modifierMeta.modify );
+		fusionStore.use( modifierFoo.modify );
+
+		var subscription = fusionStore.subscribe(this, function (state) {
+			expect(state.meta).toBe("Applied");
+			expect(state.foo).toBeDefined();
+			expect(state.foo.bar).toBe(42);
+		});
+
+		NanoFlux.createFusionator({
+			testA : function(state, args) {
+				return {a: args[0]}
+			}
+		}, {
+			a: ""
+		});
+
+		var testActorA = NanoFlux.getFusionActor("testA");
+		testActorA("fromA");
 
 		subscription.unsubscribe();
 
