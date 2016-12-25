@@ -192,19 +192,16 @@ The middleware function receives two versions of a state, the new state and the 
 While the old state is immutable, the new state can be modified. That way, the middleware can be used as transformation pipeline. 
 
 ```javascript
-function TimestampMiddleware(propName, value){
-	this.modify = function(newState, oldState){
+function addTimestamp(newState, oldState){
 
 		var modifiedState = {};
-		modifiedState.modified = Date.now(); // adds a timestamp to the state
+		modifiedState.modified = Date.now();
 
 		Object.assign(newState, modifiedState);
 		return newState;
-	};
 }
 
-var modifierMeta = new TimestampMiddleware();
-fusionStore.use( modifierMeta.modify );
+fusionStore.use( addTimestamp );
 
 ```
 

@@ -261,7 +261,6 @@ module.exports = {
 module.exports = _dereq_('./dist/nanoflux');
 },{"./dist/nanoflux":1}],3:[function(_dereq_,module,exports){
 var nanoflux = _dereq_('nanoflux');
-
 var FUSION_STORE_NAME = "__fusionStore__";
 var DEFAULT_FUSIONATOR_NAME = "__defaultFusionator__";
 
@@ -279,6 +278,10 @@ function getFusionStoreDefinition(){
 		return Object.freeze(obj);
 	}
 
+
+
+	var middleware = [];
+
 	var stateHolder = {
 		immutableState : null,
 		setState : function(newState){
@@ -287,25 +290,42 @@ function getFusionStoreDefinition(){
 		}
 	};
 
-	function fuseState(newState, dontNotify){
+	function callMiddlewares(newState){
+		var mutableState = newState;
+		for(var i = 0; i < middleware.length; ++i){
+			mutableState = middleware[i].call(this, mutableState, stateHolder.immutableState);
+		}
+		return mutableState;
+	}
+
+	function fuseState(newState, isInitialization){
 		var state = {};
+
+		if(!isInitialization)
+			newState = callMiddlewares.call(this, newState);
+
 		Object.assign(state, stateHolder.immutableState, newState);
 		stateHolder.setState(state);
-		if(!dontNotify)
+		if(!isInitialization)
 			this.notify(stateHolder.immutableState);
 	}
 
 	return {
 		on__fuse : function(args){
+
 			var fusionator = args.fuse.call(null, stateHolder.immutableState, args.params);
 			if(fusionator.then){ // is promise
 				fusionator.then(fuseState.bind(this));
 			}else{
 				fuseState.call(this, fusionator);
 			}
+
 		},
 		__initState : function(state){
 			fuseState.call(this,state,true);
+		},
+		use: function(fn){
+			middleware.push(fn);
 		},
 		getState : function(){
 			return stateHolder.immutableState;
@@ -332,10 +352,6 @@ function createFusionActor(descriptor, actorId, initialState){
 			params: arguments
 		})
 	}
-}
-
-function initializeState(initialState){
-	var initializeActor = createFusionActor("_")
 }
 
 nanoflux.createFusionator = function(descriptor, initialState, fusionatorName) {
