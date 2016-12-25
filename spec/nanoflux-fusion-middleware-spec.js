@@ -126,5 +126,46 @@ describe("NanoFlux Fusion Middleware", function () {
 		subscription.unsubscribe();
 
 	});
+	it("should apply for multiple Fusionators", function () {
+
+		var fusionStore = NanoFlux.getFusionStore();
+
+		var modifierMeta = new ModifyingMiddleware("meta", "Applied");
+		var modifierFoo = new ModifyingMiddleware("foo", {bar: 42});
+		fusionStore.use( modifierMeta.modify );
+		fusionStore.use( modifierFoo.modify );
+
+		var subscription = fusionStore.subscribe(this, function (state) {
+			expect(state.meta).toBe("Applied");
+			expect(state.foo).toBeDefined();
+			expect(state.foo.bar).toBe(42);
+			if (state.a) {
+				expect(state.a).toBe("fromFusionatorA");
+			}
+			if (state.b) {
+				expect(state.b).toBe("fromFusionatorB");
+			}
+		});
+
+		var fusionatorA = NanoFlux.createFusionator({
+			actionA : function (state, args){
+				return {a: args[0]}
+			}
+		}, {a: ""}, "fusionatorA");
+
+		var fusionatorB = NanoFlux.createFusionator({
+			actionA : function(state, args) {
+				return {b: args[0]}
+			}
+		}, {b: ""}, "fusionatorB");
+
+		var fusionatorAActor = NanoFlux.getFusionActor("actionA", "fusionatorA");
+		var fusionatorBActor = NanoFlux.getFusionActor("actionA", "fusionatorB");
+
+		fusionatorAActor("fromFusionatorA");
+		fusionatorBActor("fromFusionatorB");
+		subscription.unsubscribe();
+
+	});
 
 });
