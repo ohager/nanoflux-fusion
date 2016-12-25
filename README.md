@@ -13,6 +13,13 @@ A Redux-like extension for Nanoflux.
 *nanoflux-fusion* is built on top of [nanoflux](https://github.com/ohager/nanoflux), a quite efficient Flux implementation,  
 and adopts the concept of reducer functions for application state management, making Flux even more comfortable.
 
+## Install
+
+Easy peasy lemon squeezy!
+
+```npm install nanoflux-fusion --save```
+
+
 ## Concept
 
 [Dan Abramov](https://github.com/gaearon) pushed the Flux evolution with [Redux](http://redux.js.org/) and proved that application 
@@ -141,6 +148,63 @@ var chainedPromises = NanoFlux.getFusionActor("chainedPromises");
 // call the actions
 simplePromise(5); // state will be { a: 5 }
 chainedPromises(5); // state will be { a: 5, b: 10 }
+
+```
+
+## Middleware Interface
+
+Since version 0.5 a middleware interface is provided. Simply pass a function object with signature ``function(newState, oldState)``
+to the ``FusionStore.use``. The middleware function __must__ return a new state, typically the received ``newState`` argument, or a modified version of it (see below). 
+
+```javascript
+
+function LoggerMiddleware(){
+	var logData = [];
+
+	this.log = function(newState, oldState){
+		logData.push({
+		    timestamp: Date.now(),
+			state: _.cloneDeep(oldState)
+		});
+
+		return newState; // must return a state 
+	};
+
+	this.countLogEntries = function(){ return logData.length };
+	this.getLogEntry = function(t){
+		return logData[t];
+	};
+}
+
+var fusionStore = NanoFlux.getFusionStore();
+var logger = new LoggerMiddleware();
+fusionStore.use( logger.log );
+// use more if needed ... 
+```
+
+#### No async support yet
+
+The current middleware implementation is purely synchronous. Of course, you could execute async operations, e.g. server requests, but the middleware won't wait for the request being finished.  
+
+### New State argument is mutable
+
+The middleware function receives two versions of a state, the new state and the prior/old state *before* the new state is being merged into the application state.
+While the old state is immutable, the new state can be modified. That way, the middleware can be used as transformation pipeline. 
+
+```javascript
+function TimestampMiddleware(propName, value){
+	this.modify = function(newState, oldState){
+
+		var modifiedState = {};
+		modifiedState.modified = Date.now(); // adds a timestamp to the state
+
+		Object.assign(newState, modifiedState);
+		return newState;
+	};
+}
+
+var modifierMeta = new TimestampMiddleware();
+fusionStore.use( modifierMeta.modify );
 
 ```
 
