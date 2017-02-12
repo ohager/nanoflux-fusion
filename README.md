@@ -156,6 +156,9 @@ chainedPromises(5); // state will be { a: 5, b: 10 }
 Since version 0.5 a middleware interface is provided. Simply pass a function object with signature ``function(newState, oldState, actionName)``
 to the ``FusionStore.use``. The middleware function __must__ return a new state, typically the received ``newState`` argument, or a modified version of it (see below). 
 
+> Note: Nanoflux also provides a middleware interface (``Nanoflux.use()``), but that interface applies for the dispatcher. In case of Fusion, the dispatcher middleware
+ isn't that useful, as it dispatches always to the same method (i.e. _on__fuse()_) with internally maintained arguments.
+
 ```javascript
 
 function LoggerMiddleware(){
@@ -163,6 +166,7 @@ function LoggerMiddleware(){
 
 	this.log = function(newState, oldState, actionName){
 		logData.push({
+		    action: actionName,
 		    timestamp: Date.now(),
 			state: _.cloneDeep(oldState)
 		});
@@ -182,9 +186,11 @@ fusionStore.use( logger.log );
 // use more if needed ... 
 ```
 
+
 #### No async support yet
 
 The current middleware implementation is purely synchronous. Of course, you could execute async operations, e.g. server requests, but the middleware won't wait for the request being finished.  
+
 
 ### New State argument is mutable
 
