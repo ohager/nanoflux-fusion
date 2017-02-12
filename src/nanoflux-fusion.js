@@ -54,7 +54,9 @@ function getFusionStoreDefinition(){
 			var actorName = args.actor;
 			var fusionator = args.fuse.call(null, stateHolder.immutableState, args.params);
 			if(fusionator.then){ // is promise
-				fusionator.then(fuseState.bind(this, actorName));
+				fusionator.then(fuseState.bind(this, actorName)).catch(function(e) {
+					console.error("# Nanoflux-Fusion: Promise Exception\n", e );
+				});
 			}else{
 				fuseState.call(this, actorName,fusionator);
 			}

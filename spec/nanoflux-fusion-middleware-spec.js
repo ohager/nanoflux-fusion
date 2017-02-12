@@ -172,7 +172,7 @@ describe("NanoFlux Fusion Middleware", function () {
 
 	});
 
-	it("should apply middleware for async Fusionators", function () {
+	it("should apply middleware for async Fusionators", function (done) {
 
 		var fusionStore = NanoFlux.getFusionStore();
 
@@ -200,13 +200,12 @@ describe("NanoFlux Fusion Middleware", function () {
 			expect(logger.isEmpty()).toBeFalsy();
 			var entry = logger.getLogEntry(0);
 			expect(entry.action).toBe("asyncAction");
-
+			subscription.unsubscribe();
+			done();
 		});
 
 		var asyncActor = NanoFlux.getFusionActor("asyncAction");
 		asyncActor();
-
-		//subscription.unsubscribe();
 
 	});
 

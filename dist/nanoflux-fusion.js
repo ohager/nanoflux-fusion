@@ -1,265 +1,10 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.NanoFlux=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 (function (global){
-!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.NanoFlux=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof _dereq_=="function"&&_dereq_;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof _dereq_=="function"&&_dereq_;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-"use strict";
-
-function ActionCreator(dispatcher, descriptor){
-    this.__dispatcher = dispatcher;
-    this.__constructor(descriptor);
-}
-
-ActionCreator.prototype.__constructor = function (descriptor) {
-    for(var func in descriptor){
-        if(descriptor.hasOwnProperty(func)){
-            this[func] = descriptor[func];
-        }
-    }
-};
-
-ActionCreator.prototype.dispatch = function(actionname, data){
-    this.__dispatcher.dispatch(actionname, data);
-};
-
-var actioncreators = {};
-
-module.exports = {
-	clear: function(){
-		actioncreators = {};
-	},
-    create: function (name, dispatcher, descriptor) {
-        if(!name || name.length===0){
-            throw "Empty names are not allowed";
-        }
-
-        actioncreators[name] = new ActionCreator(dispatcher, descriptor);
-        return actioncreators[name];
-    },
-
-    getActions: function (name) {
-        return actioncreators[name];
-    }
-};
-
-},{}],2:[function(_dereq_,module,exports){
-"use strict";
-
-function guaranteeArray(obj){
-    return !Array.isArray(obj) ? [obj] : obj;
-}
-
-function Dispatcher(actions) {
-
-	var self = this;
-    this.__stores = [];
-	this.__handlerMapCache = {};
-	this.__isDispatching = false;
-
-    var createActionList = function (actionArray) {
-
-        var actions = guaranteeArray(actionArray);
-
-        for (var i = 0; i < actions.length; ++i) {
-            self.__registerAction(actions[i]);
-        }
-    };
-
-    var initialize = function () {
-        if (actions) {
-            createActionList(actions);
-        }
-    };
-
-    initialize();
-}
-
-Dispatcher.prototype.__getHandlerName = function(actionName){
-	var r = this.__handlerMapCache[actionName];
-	if(!r){
-		r = "on" + actionName[0].toUpperCase() + actionName.substr(1);
-		this.__handlerMapCache[actionName] = r;
-	}
-	return r;
-};
-
-Dispatcher.prototype.__callAction = function(){
-    var handler = this.__getHandlerName(arguments[0]);
-    var args = Array.prototype.slice.call(arguments,1);
-
-    for (var i = 0; i < this.__stores.length; ++i) {
-        var store = this.__stores[i];
-        if(store[handler]){
-            store[handler].apply(store, args);
-        }
-	}
-};
-
-Dispatcher.prototype.__registerAction = function (actionName) {
-    if(!this[actionName]) {
-        this[actionName] = this.__callAction.bind(this, actionName);
-    }
-};
-
-Dispatcher.prototype.connectTo = function (storeArray) {
-
-    var stores = guaranteeArray(storeArray);
-
-    for(var i=0; i<stores.length;++i){
-        if(this.__stores.indexOf(stores[i])===-1){
-            this.__stores.push(stores[i]);
-        }
-    }
-
-};
-
-Dispatcher.prototype.dispatch = function (actionName, data) {
-
-	if(this.__isDispatching){
-		throw "DISPATCH WHILE DISPATCHING: Don't trigger any action in your store callbacks!";
-	}
-
-	try {
-		this.__isDispatching = true;
-		this.__registerAction(actionName);
-		this[actionName](data);
-	}catch(e){
-		console.error(e);
-		throw e;
-	}
-	finally{
-		this.__isDispatching = false;
-	}
-};
-
-var dispatchers = {};
-var defaultDispatcherName = "__defDispatcher";
-
-function __getDispatcher(name, actionArray){
-
-	if(!name){
-		name = defaultDispatcherName;
-	}
-
-	if(!dispatchers[name]){
-		dispatchers[name] = new Dispatcher(actionArray);
-	}
-	return dispatchers[name];
-}
-
-module.exports = {
-	clear: function(){ dispatchers = {}; },
-    create: function (name, actionArray) {
-    	return __getDispatcher(name, actionArray);
-    },
-    getDispatcher: function (name) {
-        return __getDispatcher(name);
-    }
-};
-
-},{}],3:[function(_dereq_,module,exports){
-"use strict";
-var storeFactory = _dereq_('./store');
-var dispatcherFactory = _dereq_('./dispatcher');
-var actionCreatorFactory = _dereq_('./actioncreator');
-
-module.exports = {
-	reset : function(){
-		dispatcherFactory.clear();
-		storeFactory.clear();
-		actionCreatorFactory.clear();
-	},
-	
-    createStore: function (name, descriptor) {
-        return storeFactory.create(name, descriptor);
-    },
-
-    createDispatcher: function (name, actionList) {
-        return dispatcherFactory.create(name, actionList);
-    },
-    createActions: function(name, dispatcher, descriptor){
-        return actionCreatorFactory.create(name, dispatcher, descriptor);
-    },
-    getDispatcher : function(name){
-        return dispatcherFactory.getDispatcher(name);
-    },
-
-    getStore : function(name){
-        return storeFactory.getStore(name);
-    },
-
-    getActions: function(name){
-        return actionCreatorFactory.getActions(name);
-    }
-
-};
-
-},{"./actioncreator":1,"./dispatcher":2,"./store":4}],4:[function(_dereq_,module,exports){
-"use strict";
-
-function Subscription(subscriber, arr) {
-
-    var subscriptionList = arr;
-    var handle = subscriber;
-
-    this.unsubscribe = function () {
-        var index = arr.indexOf(handle);
-        subscriptionList.splice(index, 1);
-    };
-}
-
-function Store(descriptor) {
-
-    this.__constructor(descriptor);
-    this.__subscriptionList = [];
-}
-
-Store.prototype.__constructor = function (descriptor) {
-    for(var func in descriptor){
-        if(descriptor.hasOwnProperty(func)){
-            this[func] = descriptor[func];
-        }
-    }
-
-    if(this.onInitialize){
-        this.onInitialize();
-    }
-};
-
-Store.prototype.subscribe = function (context, func) {
-    var subscriber = {context: context, func: func};
-    this.__subscriptionList.push(subscriber);
-    return new Subscription(subscriber, this.__subscriptionList);
-};
-
-Store.prototype.notify = function () {
-    for (var i = 0; i < this.__subscriptionList.length; ++i) {
-        var subscriber = this.__subscriptionList[i];
-        subscriber.func.apply(subscriber.context, arguments);
-    }
-};
-
-var stores = {};
-module.exports = {
-	clear : function() {
-		stores = {};
-	},
-    create: function (name, storeDescriptor) {
-        stores[name] = new Store(storeDescriptor);
-        return stores[name];
-    },
-    getStore: function (name) {
-        return stores[name];
-    }
-
-};
-
-
-},{}]},{},[3])
-(3)
-});
+!function(t){if("object"==typeof exports)module.exports=t();else if("function"==typeof define&&define.amd)define(t);else{var e;"undefined"!=typeof window?e=window:"undefined"!=typeof global?e=global:"undefined"!=typeof self&&(e=self),e.NanoFlux=t()}}(function(){return function t(e,r,n){function i(s,c){if(!r[s]){if(!e[s]){var a="function"==typeof _dereq_&&_dereq_;if(!c&&a)return a(s,!0);if(o)return o(s,!0);throw new Error("Cannot find module '"+s+"'")}var u=r[s]={exports:{}};e[s][0].call(u.exports,function(t){var r=e[s][1][t];return i(r?r:t)},u,u.exports,t,e,r,n)}return r[s].exports}for(var o="function"==typeof _dereq_&&_dereq_,s=0;s<n.length;s++)i(n[s]);return i}({1:[function(t,e,r){"use strict";function n(t,e){this.__dispatcher=t,this.__constructor(e)}n.prototype.__constructor=function(t){for(var e in t)t.hasOwnProperty(e)&&(this[e]=t[e])},n.prototype.dispatch=function(t,e){this.__dispatcher.dispatch(t,e)};var i={};e.exports={clear:function(){i={}},create:function(t,e,r){if(!t||0===t.length)throw"Empty names are not allowed";return i[t]=new n(e,r),i[t]},getActions:function(t){return i[t]}}},{}],2:[function(t,e,r){"use strict";function n(t){return Array.isArray(t)?t:[t]}function i(t){var e=this;this.__stores=[],this.__handlerMapCache={},this.__isDispatching=!1,this.__middlewares=[];var r=function(t){for(var r=n(t),i=0;i<r.length;++i)e.__registerAction(r[i])},i=function(){t&&r(t)};i()}function o(t,e){return t||(t=c),s[t]||(s[t]=new i(e)),s[t]}i.prototype.__getHandlerName=function(t){var e=this.__handlerMapCache[t];return e||(e="on"+t[0].toUpperCase()+t.substr(1),this.__handlerMapCache[t]=e),e},i.prototype.__callAction=function(){var t=this.__getHandlerName(arguments[0]),e=Array.prototype.slice.call(arguments,1);this.__callMiddleware(t,e);for(var r=0;r<this.__stores.length;++r){var n=this.__stores[r];n[t]&&n[t].apply(n,e)}},i.prototype.__registerAction=function(t){this[t]||(this[t]=this.__callAction.bind(this,t))},i.prototype.__callMiddleware=function(t,e){for(var r=0;r<this.__middlewares.length;++r)this.__middlewares[r].call(null,t,e)},i.prototype.addMiddleware=function(t){this.__middlewares.push(t)},i.prototype.connectTo=function(t){for(var e=n(t),r=0;r<e.length;++r)this.__stores.indexOf(e[r])===-1&&this.__stores.push(e[r])},i.prototype.dispatch=function(t,e){if(this.__isDispatching)throw"DISPATCH WHILE DISPATCHING: Don't trigger any action in your store callbacks!";try{this.__isDispatching=!0,this.__registerAction(t),this[t](e)}catch(r){throw console.error(r),r}finally{this.__isDispatching=!1}};var s={},c="__defDispatcher";e.exports={clear:function(){s={}},create:function(t,e){return o(t,e)},getDispatcher:function(t){return o(t)}}},{}],3:[function(t,e,r){"use strict";var n=t("./store"),i=t("./dispatcher"),o=t("./actioncreator");e.exports={reset:function(){i.clear(),n.clear(),o.clear()},createStore:function(t,e){return n.create(t,e)},createDispatcher:function(t,e){return i.create(t,e)},createActions:function(t,e,r){return o.create(t,e,r)},getDispatcher:function(t){return i.getDispatcher(t)},getStore:function(t){return n.getStore(t)},getActions:function(t){return o.getActions(t)},use:function(t,e){e?e.addMiddleware(t):i.getDispatcher().addMiddleware(t)}}},{"./actioncreator":1,"./dispatcher":2,"./store":4}],4:[function(t,e,r){"use strict";function n(t,e){var r=e,n=t;this.unsubscribe=function(){var t=e.indexOf(n);r.splice(t,1)}}function i(t){this.__constructor(t),this.__subscriptionList=[]}i.prototype.__constructor=function(t){for(var e in t)t.hasOwnProperty(e)&&(this[e]=t[e]);this.onInitialize&&this.onInitialize()},i.prototype.subscribe=function(t,e){var r={context:t,func:e};return this.__subscriptionList.push(r),new n(r,this.__subscriptionList)},i.prototype.notify=function(){for(var t=0;t<this.__subscriptionList.length;++t){var e=this.__subscriptionList[t];e.func.apply(e.context,arguments)}};var o={};e.exports={clear:function(){o={}},create:function(t,e){return o[t]=new i(e),o[t]},getStore:function(t){return o[t]}}},{}]},{},[3])(3)});
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],2:[function(_dereq_,module,exports){
-module.exports = _dereq_('./dist/nanoflux');
-},{"./dist/nanoflux":1}],3:[function(_dereq_,module,exports){
+module.exports = _dereq_('./dist/nanoflux.min');
+},{"./dist/nanoflux.min":1}],3:[function(_dereq_,module,exports){
 var nanoflux = _dereq_('nanoflux');
 var FUSION_STORE_NAME = "__fusionStore__";
 var DEFAULT_FUSIONATOR_NAME = "__defaultFusionator__";
@@ -290,19 +35,19 @@ function getFusionStoreDefinition(){
 		}
 	};
 
-	function callMiddlewares(newState){
+	function callMiddlewares(newState, actorName){
 		var mutableState = newState;
 		for(var i = 0; i < middleware.length; ++i){
-			mutableState = middleware[i].call(this, mutableState, stateHolder.immutableState);
+			mutableState = middleware[i].call(this, mutableState, stateHolder.immutableState, actorName);
 		}
 		return mutableState;
 	}
 
-	function fuseState(newState, isInitialization){
+	function fuseState(actorName, newState, isInitialization){
 		var state = {};
 
 		if(!isInitialization)
-			newState = callMiddlewares.call(this, newState);
+			newState = callMiddlewares.call(this, newState, actorName);
 
 		Object.assign(state, stateHolder.immutableState, newState);
 		stateHolder.setState(state);
@@ -313,16 +58,19 @@ function getFusionStoreDefinition(){
 	return {
 		on__fuse : function(args){
 
+			var actorName = args.actor;
 			var fusionator = args.fuse.call(null, stateHolder.immutableState, args.params);
 			if(fusionator.then){ // is promise
-				fusionator.then(fuseState.bind(this));
+				fusionator.then(fuseState.bind(this, actorName)).catch(function(e) {
+					console.error("# Nanoflux-Fusion: Promise Exception\n", e );
+				});
 			}else{
-				fuseState.call(this, fusionator);
+				fuseState.call(this, actorName,fusionator);
 			}
 
 		},
 		__initState : function(state){
-			fuseState.call(this,state,true);
+			fuseState.call(this,"__initState",state,true);
 		},
 		use: function(fn){
 			middleware.push(fn);
@@ -345,9 +93,10 @@ function createFusionStore(isReset){
 var fusionators = [];
 nanoflux.getFusionStore = function(){ return nanoflux.getStore(FUSION_STORE_NAME) };
 
-function createFusionActor(descriptor, actorId, initialState){
+function createFusionActor(descriptor, actorId){
 	return function(){
 		nanoflux.getDispatcher().__fuse({
+			actor: actorId,
 			fuse: descriptor[actorId],
 			params: arguments
 		})

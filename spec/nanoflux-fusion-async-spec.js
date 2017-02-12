@@ -68,6 +68,14 @@ var asyncFusionatorDecriptor = {
 			}, ASYNC_DELAY_MS);
 		});
 	},
+	rejectionTest : function(){
+		return new Promise(function(resolve, reject){
+			// simulating async operation
+			setTimeout(function(){
+				reject("Reject Test");
+			}, ASYNC_DELAY_MS);
+		});
+	},
 	chainTest: function() {
 		return asyncA().then(function(data){
 			return asyncB();
@@ -118,6 +126,45 @@ describe("NanoFlux Fusion Asynchronous", function () {
 		var testActor = NanoFlux.getFusionActor("test");
 
 		testActor("someValue", {foo: "foo", bar: 123});
+	});
+
+	it("should be able to deal with Promise Chains (async)", function (done) {
+
+		// when calling here, async should already be executed
+		var fusionStore = NanoFlux.getFusionStore();
+
+		subscription = fusionStore.subscribe(this, function(state){
+			expect(state.a).toBe("fromAsyncB");
+			subscription.unsubscribe();
+			done();
+		});
+
+		NanoFlux.getFusionActor("chainTest")();
+	});
+
+	it("should be able handle rejections (async)", function (done) {
+
+		var fusionStore = NanoFlux.getFusionStore();
+
+		var spy = { callback : function(state){
+			expect(true).toBeFalsy(); // will fail here, if called!
+			done();
+		} };
+
+		var spiedFunc = spyOn(spy, 'callback');
+		var subscription = fusionStore.subscribe(this, spy.callback);
+
+		var testActor = NanoFlux.getFusionActor("rejectionTest");
+
+		testActor("someValue", {foo: "foo", bar: 123});
+
+		setTimeout(function(){
+			expect(spiedFunc).not.toHaveBeenCalled();
+			subscription.unsubscribe();
+			done();
+		}, 250)
+
+
 	});
 
 	it("should be able to deal with Promise Chains (async)", function (done) {
