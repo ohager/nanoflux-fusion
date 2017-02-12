@@ -153,7 +153,7 @@ chainedPromises(5); // state will be { a: 5, b: 10 }
 
 ## Middleware Interface
 
-Since version 0.5 a middleware interface is provided. Simply pass a function object with signature ``function(newState, oldState)``
+Since version 0.5 a middleware interface is provided. Simply pass a function object with signature ``function(newState, oldState, actionName)``
 to the ``FusionStore.use``. The middleware function __must__ return a new state, typically the received ``newState`` argument, or a modified version of it (see below). 
 
 ```javascript
@@ -161,7 +161,7 @@ to the ``FusionStore.use``. The middleware function __must__ return a new state,
 function LoggerMiddleware(){
 	var logData = [];
 
-	this.log = function(newState, oldState){
+	this.log = function(newState, oldState, actionName){
 		logData.push({
 		    timestamp: Date.now(),
 			state: _.cloneDeep(oldState)

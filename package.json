@@ -1,7 +1,7 @@
 {
   "name": "nanoflux-fusion",
   "description": "nanoflux fusion is a redux-inspired application state manager based on nanoflux",
-  "version": "0.5.0-beta",
+  "version": "0.5.1-beta",
   "author": "Oliver Hager",
   "email": "oliver@devbutze.com",
   "private": false,

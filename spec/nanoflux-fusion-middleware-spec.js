@@ -10,27 +10,30 @@ nanofluxDir = "../src/nanoflux-fusion";
 
 var NanoFlux = require(nanofluxDir);
 
-function LoggerMiddleware(){
+function LoggerMiddleware() {
 	var logData = [];
 
-	this.log = function(newState, oldState){
+	this.log = function (newState, oldState, actionName) {
 		logData.push({
 			new: newState,
-			old: oldState
+			old: oldState,
+			action: actionName
 		});
 
 		return newState;
 	};
 
-	this.isEmpty = function(){ return logData.length === 0 };
+	this.isEmpty = function () {
+		return logData.length === 0
+	};
 
-	this.getLogEntry = function(t){
+	this.getLogEntry = function (t) {
 		return logData[t];
 	};
 }
 
-function ModifyingMiddleware(propName, value){
-	this.modify = function(newState, oldState){
+function ModifyingMiddleware(propName, value) {
+	this.modify = function (newState, oldState, actorName) {
 
 		var modifiedState = {};
 		modifiedState[propName] = value;
@@ -52,21 +55,22 @@ describe("NanoFlux Fusion Middleware", function () {
 		var fusionStore = NanoFlux.getFusionStore();
 
 		var logger = new LoggerMiddleware();
-		fusionStore.use( logger.log );
+		fusionStore.use(logger.log);
 
 		var subscription = fusionStore.subscribe(this, function (state) {
 
 			expect(logger.isEmpty()).toBeFalsy();
 
 			var entry = logger.getLogEntry(0);
+			expect(entry.action).toBe("testA");
 			expect(entry.old.a).toBe("");
 			expect(entry.old.b).toBe(0);
 			expect(entry.new.a).toBe("fromA");
 			expect(entry.new.b).toBeUndefined();
 
 			entry = logger.getLogEntry(1);
-			if(entry)
-			{
+			if (entry) {
+				expect(entry.action).toBe("testB");
 				expect(entry.old.a).toBe("fromA");
 				expect(entry.old.b).toBe(0);
 				expect(entry.new.b).toBe(42);
@@ -76,15 +80,15 @@ describe("NanoFlux Fusion Middleware", function () {
 		});
 
 		NanoFlux.createFusionator({
-			testA : function(state, args) {
+			testA: function (state, args) {
 				return {a: args[0]}
 			},
-			testB : function(state, args){
+			testB: function (state, args) {
 				return {b: args[0]}
 			}
 		}, {
 			a: "",
-			b : 0
+			b: 0
 		});
 
 		var testActorA = NanoFlux.getFusionActor("testA");
@@ -103,8 +107,8 @@ describe("NanoFlux Fusion Middleware", function () {
 
 		var modifierMeta = new ModifyingMiddleware("meta", "Applied");
 		var modifierFoo = new ModifyingMiddleware("foo", {bar: 42});
-		fusionStore.use( modifierMeta.modify );
-		fusionStore.use( modifierFoo.modify );
+		fusionStore.use(modifierMeta.modify);
+		fusionStore.use(modifierFoo.modify);
 
 		var subscription = fusionStore.subscribe(this, function (state) {
 			expect(state.meta).toBe("Applied");
@@ -113,7 +117,7 @@ describe("NanoFlux Fusion Middleware", function () {
 		});
 
 		NanoFlux.createFusionator({
-			testA : function(state, args) {
+			testA: function (state, args) {
 				return {a: args[0]}
 			}
 		}, {
@@ -132,8 +136,8 @@ describe("NanoFlux Fusion Middleware", function () {
 
 		var modifierMeta = new ModifyingMiddleware("meta", "Applied");
 		var modifierFoo = new ModifyingMiddleware("foo", {bar: 42});
-		fusionStore.use( modifierMeta.modify );
-		fusionStore.use( modifierFoo.modify );
+		fusionStore.use(modifierMeta.modify);
+		fusionStore.use(modifierFoo.modify);
 
 		var subscription = fusionStore.subscribe(this, function (state) {
 			expect(state.meta).toBe("Applied");
@@ -148,13 +152,13 @@ describe("NanoFlux Fusion Middleware", function () {
 		});
 
 		var fusionatorA = NanoFlux.createFusionator({
-			actionA : function (state, args){
+			actionA: function (state, args) {
 				return {a: args[0]}
 			}
 		}, {a: ""}, "fusionatorA");
 
 		var fusionatorB = NanoFlux.createFusionator({
-			actionA : function(state, args) {
+			actionA: function (state, args) {
 				return {b: args[0]}
 			}
 		}, {b: ""}, "fusionatorB");
@@ -167,5 +171,44 @@ describe("NanoFlux Fusion Middleware", function () {
 		subscription.unsubscribe();
 
 	});
+
+	it("should apply middleware for async Fusionators", function () {
+
+		var fusionStore = NanoFlux.getFusionStore();
+
+		var logger = new LoggerMiddleware();
+		NanoFlux.getFusionStore().use( logger.log );
+
+		function async() {
+			return new Promise(function (resolve, reject) {
+				setTimeout(function () {
+					resolve({ a: "fromAsync" });
+				}, 100)
+			})
+		}
+
+		NanoFlux.createFusionator({
+				asyncAction: function () {
+					return async();
+				}
+			}
+			, { a: "" });
+
+		var subscription = fusionStore.subscribe(this, function (state) {
+
+			expect(state.a).toBe("fromAsync");
+			expect(logger.isEmpty()).toBeFalsy();
+			var entry = logger.getLogEntry(0);
+			expect(entry.action).toBe("asyncAction");
+
+		});
+
+		var asyncActor = NanoFlux.getFusionActor("asyncAction");
+		asyncActor();
+
+		//subscription.unsubscribe();
+
+	});
+
 
 });
